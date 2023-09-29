@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: ${APP_NAME:config-server}
+  profiles:
+    active: jdbc
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    default-schema: ${DATABASE_DEFAULT_SCHEMA:public}
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/OB_CONFIG_SERVER?useSSL=false}
+    username: ${DATABASE_USERNAME:OB_CONFIG_SERVER}
+    password: ${DATABASE_PASSWORD:OB_CONFIG_SERVER}
+    driverClassName: ${DATABASE_DRIVER:org.postgresql.Driver}
+  cloud:
+    config:
+      server:
+        bootstrap: true
+        jdbc:
+          sql: SELECT k, v from properties WHERE application=? AND profile=? AND label=? order by ordering asc
+          order: 1
+server:
+  port: ${PORT:8888}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    env:
+      post:
+        enabled: true
+eureka:
+  instance:
+     appname: ${spring.application.name}
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}
+    healthcheck:
+      enabled: true
+    register-with-eureka: true
+    fetch-registry: true
